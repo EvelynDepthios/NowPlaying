@@ -28,27 +28,27 @@ class _AboutScreenState extends State<AboutScreen> {
   }
 
   Future<void> _loadAboutMe() async {
-  Map<String, dynamic> data = await _prefsService.getAboutMe();
-  setState(() {
-    fullName = data['fullName'] ?? "Your Name";
-    nickname = data['nickname'] ?? "Your Nickname";
-    hobbies = data['hobbies'] ?? "Your Hobbies";
-    profileImage = data['profileImage'] ?? "";
-    socialMedia = List<Map<String, String>>.from(data['socialMedia']);
-    moviePreferences = List<String>.from(data['moviePreferences']);
-  });
-}
+    Map<String, dynamic> data = await _prefsService.getAboutMe();
+    setState(() {
+      fullName = data['fullName'] ?? "Your Name";
+      nickname = data['nickname'] ?? "Your Nickname";
+      hobbies = data['hobbies'] ?? "Your Hobbies";
+      profileImage = data['profileImage'] ?? "";
+      socialMedia = List<Map<String, String>>.from(data['socialMedia']);
+      moviePreferences = List<String>.from(data['moviePreferences']);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text("About Me"),
+        title: const Text("Profile", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: const Icon(Icons.edit, color: Colors.white),
             onPressed: () async {
               final updated = await Navigator.push(
                 context,
@@ -58,14 +58,14 @@ class _AboutScreenState extends State<AboutScreen> {
                     nickname: nickname,
                     hobbies: hobbies,
                     profileImage: profileImage,
-                    socialMedia: List<Map<String, String>>.from(socialMedia), // ✅ Convert to List<Map<String, String>>
+                    socialMedia: List<Map<String, String>>.from(socialMedia),
                     moviePreferences: List<String>.from(moviePreferences),
                   ),
                 ),
               );
 
               if (updated == true) {
-                _loadAboutMe(); // Refresh data setelah diedit
+                _loadAboutMe();
               }
             },
           ),
@@ -74,130 +74,45 @@ class _AboutScreenState extends State<AboutScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Foto Profil dengan Animasi
-            GestureDetector(
-              onTap: () {
-                if (profileImage.isNotEmpty) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => Dialog(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.file(File(profileImage), fit: BoxFit.cover),
+            // **Foto Profil**
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  if (profileImage.isNotEmpty) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.file(File(profileImage), fit: BoxFit.cover),
+                        ),
                       ),
-                    ),
-                  );
-                }
-              },
-              child: CircleAvatar(
-                radius: 70,
-                backgroundImage: profileImage.isNotEmpty
-                    ? FileImage(File(profileImage))
-                    : const AssetImage("assets/profile.jpg") as ImageProvider,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Nama dalam Card
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Text(
-                      fullName,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      "@$nickname",
-                      style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                    ),
-                  ],
+                    );
+                  }
+                },
+                child: CircleAvatar(
+                  radius: 70,
+                  backgroundImage: profileImage.isNotEmpty
+                      ? FileImage(File(profileImage))
+                      : const AssetImage("assets/profile.jpg") as ImageProvider,
                 ),
               ),
             ),
+
             const SizedBox(height: 20),
 
-            // Informasi Lainnya
-            _buildInfoTile(Icons.favorite, "Hobbies", hobbies),
-            const SizedBox(height: 10),
+            // **Form Data Diri (Nama, Nickname, Hobi)**
+            _buildInfoField("Full Name", fullName),
+            _buildInfoField("Nickname", nickname),
+            _buildInfoField("Hobbies", hobbies),
 
-            // Social Media List
-            const Text(
-              "Social Media",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Column(
-                children: socialMedia.isNotEmpty
-                    ? socialMedia.map((social) {
-                        return Column(
-                          children: [
-                            ListTile(
-                              leading: const Icon(Icons.link, color: Colors.blueAccent),
-                              title: Text(
-                                "${social['platform']}: ${social['username']}",
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            _buildDivider(),
-                          ],
-                        );
-                      }).toList()
-                    : [
-                        const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Text(
-                            "No social media added.",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                        ),
-                      ],
-              ),
-            ),
             const SizedBox(height: 20),
 
-            // Movie Preferences List (Mirip dengan Movie Detail)
-            const Text(
-              "Movie Preferences",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: moviePreferences.isNotEmpty
-                    ? Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: moviePreferences.map((genre) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: _getGenreColor(genre),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              genre,
-                              style: const TextStyle(color: Colors.white, fontSize: 14),
-                            ),
-                          );
-                        }).toList(),
-                      )
-                    : const Text(
-                        "No movie preferences selected.",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-              ),
-            ),
+            // **Social Media & Movie Preferences dalam Column**
+            _buildSocialMediaCard(),
+            const SizedBox(height: 16),
+            _buildMoviePreferencesCard(),
           ],
         ),
       ),
@@ -205,23 +120,123 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // Widget untuk Menampilkan Informasi dengan Icon
-  Widget _buildInfoTile(IconData icon, String label, String value) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blueAccent),
-        title: Text(
-          label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(value, style: const TextStyle(fontSize: 16)),
+  // **Widget untuk Nama, Nickname, Hobi**
+  Widget _buildInfoField(String label, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16, color: Colors.white),
+          ),
+        ],
       ),
     );
   }
 
-  // Garis Pembatas antar Informasi
+  // **Card untuk Social Media**
+  Widget _buildSocialMediaCard() {
+    return Card(
+      color: Colors.grey[900],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Social Media", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+            const SizedBox(height: 8),
+            socialMedia.isNotEmpty
+                ? Column(
+                    children: socialMedia.map((social) {
+                      return Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.link, color: Colors.deepPurpleAccent),
+                            title: Text(
+                              "${social['platform']}: ${social['username']}",
+                              style: const TextStyle(fontSize: 16, color: Colors.white),
+                            ),
+                          ),
+                          _buildDivider(),
+                        ],
+                      );
+                    }).toList(),
+                  )
+                : const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text("No social media added.", style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // **Card untuk Movie Preferences**
+  Widget _buildMoviePreferencesCard() {
+    return Card(
+      color: Colors.grey[900],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Movie Preferences",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            moviePreferences.isNotEmpty
+                ? Center( // Pusatkan elemen ke tengah
+                    child: Wrap(
+                      spacing: 8, // Jarak antar elemen horizontal
+                      runSpacing: 8, // Jarak antar elemen vertikal
+                      alignment: WrapAlignment.center, // Pusatkan elemen dalam satu baris
+                      children: moviePreferences.map((genre) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _getGenreColor(genre),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            genre,
+                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  )
+                : const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text(
+                      "No movie preferences selected.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // **Garis Pembatas antar Informasi**
   Widget _buildDivider() {
     return const Divider(
       thickness: 1,
@@ -231,28 +246,28 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // Warna Khusus untuk Genre
+  // **Warna untuk Genre (Ditingkatkan)**
   Color _getGenreColor(String genre) {
     Map<String, Color> genreColors = {
-      "Action": Colors.red,
-      "Adventure": Colors.orange,
-      "Animation": Colors.blue,
-      "Comedy": Colors.yellow,
-      "Crime": Colors.brown,
-      "Documentary": Colors.grey,
-      "Drama": Colors.purple,
-      "Family": Colors.pink,
-      "Fantasy": Colors.teal,
-      "History": Colors.indigo,
-      "Horror": Colors.black,
-      "Music": Colors.green,
-      "Mystery": Colors.deepPurple,
-      "Romance": Colors.pinkAccent,
-      "Science Fiction": Colors.cyan,
-      "TV Movie": Colors.lightBlue,
-      "Thriller": Colors.redAccent,
-      "War": Colors.deepOrange,
-      "Western": Colors.amber,
+      "Action": const Color(0xFFD32F2F), 
+      "Adventure": const Color(0xFFFF9800), 
+      "Animation": const Color(0xFF64B5F6), 
+      "Comedy": const Color.fromARGB(255, 206, 185, 0), 
+      "Crime": const Color(0xFF795548), 
+      "Documentary": const Color.fromARGB(255, 76, 107, 122), 
+      "Drama": const Color(0xFFBA68C8), 
+      "Family": const Color(0xFFFF80AB), 
+      "Fantasy": const Color(0xFF4DB6AC), 
+      "History": const Color(0xFF7986CB), 
+      "Horror": const Color(0xFFB71C1C), 
+      "Music": const Color(0xFF81C784), 
+      "Mystery": const Color(0xFF9575CD), 
+      "Romance": const Color(0xFFF06292), 
+      "Science Fiction": const Color(0xFF4DD0E1), 
+      "TV Movie": const Color(0xFF42A5F5), 
+      "Thriller": const Color(0xFFFF5252),
+      "War": const Color(0xFFFF7043),
+      "Western": const Color(0xFFFFA726),
     };
     return genreColors[genre] ?? Colors.grey;
   }

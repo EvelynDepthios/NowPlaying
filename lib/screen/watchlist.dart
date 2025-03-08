@@ -57,43 +57,99 @@ class _WatchListScreenState extends State<WatchListScreen> {
     await prefs.setStringList('watchlist', watchlist);
   }
 
+  void _confirmDelete(Movie movie) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return AlertDialog(
+          backgroundColor: colorScheme.surface,
+          title: const Text(
+            "Remove from Watchlist",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text("Are you sure you want to remove '${movie.title}' from your watchlist?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel", style: TextStyle(color: colorScheme.onSurface)),
+            ),
+            TextButton(
+              onPressed: () {
+                _removeFromWatchlist(movie.id.toString());
+                Navigator.pop(context);
+              },
+              child: const Text("Remove", style: TextStyle(color: Colors.redAccent)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Watchlist", style: TextStyle(fontWeight: FontWeight.bold))),
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        title: const Text("Watchlist", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: colorScheme.primary,
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : _watchlistMovies.isEmpty
-              ? const Center(child: Text("No movies in watchlist"))
+              ? const Center(
+                  child: Text(
+                    "No movies in watchlist",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                )
               : ListView.builder(
                   itemCount: _watchlistMovies.length,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   itemBuilder: (context, index) {
                     final movie = _watchlistMovies[index];
-                    return ListTile(
-                      leading: Image.network(
-                        "https://image.tmdb.org/t/p/w200${movie.backDropPath}",
-                        width: 50,
-                        fit: BoxFit.cover,
-                      ),
-                      title: Text(
-                        movie.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold, // Membuat teks menjadi bold
-                        ),
-                      ),
-                      subtitle: Text("Release Date: ${movie.releaseDate}"),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _removeFromWatchlist(movie.id.toString()),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MovieDetailScreen(movie: movie),
+                    return Card(
+                      color: colorScheme.surface,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(12),
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            "https://image.tmdb.org/t/p/w200${movie.backDropPath}",
+                            width: 60,
+                            fit: BoxFit.cover,
                           ),
-                        );
-                      },
+                        ),
+                        title: Text(
+                          movie.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        subtitle: Text(
+                          "Release Date: ${movie.releaseDate}",
+                          style: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.redAccent),
+                          onPressed: () => _confirmDelete(movie),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MovieDetailScreen(movie: movie),
+                            ),
+                          );
+                        },
+                      ),
                     );
                   },
                 ),

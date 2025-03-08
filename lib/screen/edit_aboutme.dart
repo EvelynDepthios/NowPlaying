@@ -37,7 +37,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
   String profileImage = "";
   List<Map<String, String>> socialMedia = [];
   List<String> selectedGenres = [];
-  List<String> allGenres = []; // Akan diisi dari API
+  List<String> allGenres = [];
 
   @override
   void initState() {
@@ -46,13 +46,10 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     _nicknameController = TextEditingController(text: widget.nickname);
     _hobbiesController = TextEditingController(text: widget.hobbies);
     profileImage = widget.profileImage;
-    socialMedia = widget.socialMedia.isNotEmpty
-          ? List<Map<String, String>>.from(widget.socialMedia)
-          : [];    
+    socialMedia = List<Map<String, String>>.from(widget.socialMedia);
     selectedGenres = List<String>.from(widget.moviePreferences);
     _loadGenres();
   }
-
 
   Future<void> _loadGenres() async {
     await _apiService.fetchGenres();
@@ -82,74 +79,129 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
       nickname: _nicknameController.text,
       hobbies: _hobbiesController.text,
     );
-
     await _prefsService.saveProfileImage(profileImage);
-    await _prefsService.saveSocialMedia(List<Map<String, String>>.from(socialMedia));
+    await _prefsService
+        .saveSocialMedia(List<Map<String, String>>.from(socialMedia));
     await _prefsService.saveMoviePreferences(selectedGenres);
 
-    Navigator.pop(context, true); // Kembali ke AboutScreen
+    Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit About Me")),
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        title: const Text("Edit About Me",
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: colorScheme.primary,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 70,
-              backgroundImage: profileImage.isNotEmpty
-                  ? Image.file(File(profileImage)).image
-                  : const AssetImage("assets/profile.jpg"),
+            // **Profile Picture**
+            Center(
+              child: CircleAvatar(
+                radius: 80,
+                backgroundImage: profileImage.isNotEmpty
+                    ? Image.file(File(profileImage)).image
+                    : const AssetImage("assets/profile.jpg"),
+              ),
             ),
             const SizedBox(height: 12),
-            ElevatedButton(onPressed: _pickImage, child: const Text("Upload Photo")),
+            ElevatedButton(
+              onPressed: _pickImage,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.secondary,
+                foregroundColor: colorScheme.onSecondary,
+              ),
+              child: const Text("Upload Photo"),
+            ),
 
+            const SizedBox(height: 10),
             _buildTextField("Full Name", _fullNameController),
             _buildTextField("Nickname", _nicknameController),
             _buildTextField("Hobbies", _hobbiesController),
 
             const SizedBox(height: 20),
-            const Text("Social Media", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
+            // **Social Media**
+            const Text(
+              "Social Media",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
             Column(
               children: socialMedia.asMap().entries.map((entry) {
                 int index = entry.key;
-                return Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: TextEditingController(text: socialMedia[index]["platform"]), // ✅ Pastikan controller ada
-                        decoration: const InputDecoration(labelText: "Platform"),
-                        onChanged: (value) => socialMedia[index]["platform"] = value,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          style: TextStyle(color: colorScheme.onSurface),
+                          controller: TextEditingController(
+                              text: socialMedia[index]["platform"]),
+                          decoration:
+                              _customInputDecoration("Platform", colorScheme),
+                          onChanged: (value) =>
+                              socialMedia[index]["platform"] = value,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        controller: TextEditingController(text: socialMedia[index]["username"]), // ✅ Pastikan controller ada
-                        decoration: const InputDecoration(labelText: "Username"),
-                        onChanged: (value) => socialMedia[index]["username"] = value,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          style: TextStyle(color: colorScheme.onSurface),
+                          controller: TextEditingController(
+                              text: socialMedia[index]["username"]),
+                          decoration:
+                              _customInputDecoration("Username", colorScheme),
+                          onChanged: (value) =>
+                              socialMedia[index]["username"] = value,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => setState(() => socialMedia.removeAt(index)),
-                    ),
-                  ],
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.redAccent),
+                        onPressed: () =>
+                            setState(() => socialMedia.removeAt(index)),
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             ),
-            ElevatedButton(onPressed: _addSocialMedia, child: const Text("Add Social Media")),
+            ElevatedButton(
+              onPressed: _addSocialMedia,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+              ),
+              child: const Text("Add Social Media"),
+            ),
 
             const SizedBox(height: 20),
-            const Text("Movie Preferences", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
+            // **Movie Preferences**
+            const Text("Movie Preferences",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: allGenres.map((genre) {
                 return FilterChip(
-                  label: Text(genre),
+                  label: Text(
+                    genre,
+                    style: TextStyle(
+                        color: selectedGenres.contains(genre)
+                            ? colorScheme.onSecondary
+                            : colorScheme.onSurface),
+                  ),
+                  selectedColor: colorScheme.secondary,
+                  backgroundColor: colorScheme.surface,
                   selected: selectedGenres.contains(genre),
                   onSelected: (isSelected) {
                     setState(() {
@@ -163,20 +215,50 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
                 );
               }).toList(),
             ),
+
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: _saveAboutMe, child: const Text("Save")),
+
+            // **Save Button**
+            ElevatedButton(
+              onPressed: _saveAboutMe,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+              ),
+              child: const Text("Save"),
+            ),
           ],
         ),
       ),
     );
   }
 
+  // **Custom Input Decoration**
+  InputDecoration _customInputDecoration(
+      String label, ColorScheme colorScheme) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: colorScheme.onSurface.withOpacity(0.7)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: colorScheme.secondary),
+      ),
+    );
+  }
+
+  // **Custom Text Field**
   Widget _buildTextField(String label, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: controller,
-        decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        decoration:
+            _customInputDecoration(label, Theme.of(context).colorScheme),
       ),
     );
   }

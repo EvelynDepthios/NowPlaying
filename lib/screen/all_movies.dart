@@ -5,7 +5,7 @@ import 'package:nowplaying/model/movie.dart';
 import 'package:nowplaying/screen/movie_detail.dart';
 import 'package:nowplaying/widget/appbar.dart';
 
-const String apiKey = "4de293b17f3059110541d94584b1727e"; // API Key TMDB
+const String apiKey = "4de293b17f3059110541d94584b1727e"; 
 
 class AllMoviesScreen extends StatefulWidget {
   final bool startWithSearch;
@@ -25,14 +25,13 @@ class _AllMoviesScreenState extends State<AllMoviesScreen> {
   String searchQuery = "";
   FocusNode _searchFocus = FocusNode();
 
-
   @override
   void initState() {
     super.initState();
     _fetchMovies();
     if (widget.startWithSearch) {
       isSearching = true;
-      Future.delayed(Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         _searchFocus.requestFocus();
       });
     }
@@ -102,38 +101,39 @@ class _AllMoviesScreenState extends State<AllMoviesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
+        backgroundColor: colorScheme.primary,
         title: isSearching
             ? TextField(
                 controller: _searchController,
                 focusNode: _searchFocus,
-                decoration: const InputDecoration(
+                style: TextStyle(color: colorScheme.onPrimary),
+                decoration: InputDecoration(
                   hintText: "Search movies...",
+                  hintStyle: TextStyle(color: colorScheme.onPrimary.withOpacity(0.7)),
                   border: InputBorder.none,
                 ),
+                onChanged: (query) => _searchMovies(query),
               )
             : const Text("All Movies", style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          isSearching
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    setState(() {
-                      _searchController.clear();
-                      isSearching = false;
-                    });
-                  },
-                )
-              : IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    setState(() {
-                      isSearching = true;
-                      _searchFocus.requestFocus();
-                    });
-                  },
-                ),
+          IconButton(
+            icon: Icon(isSearching ? Icons.clear : Icons.search, color: colorScheme.onPrimary),
+            onPressed: () {
+              setState(() {
+                if (isSearching) {
+                  _searchController.clear();
+                  _fetchMovies();
+                }
+                isSearching = !isSearching;
+                if (isSearching) _searchFocus.requestFocus();
+              });
+            },
+          ),
         ],
       ),
       body: Column(
@@ -143,7 +143,7 @@ class _AllMoviesScreenState extends State<AllMoviesScreen> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _movies.isEmpty
-                    ? const Center(child: Text("No movies found"))
+                    ? const Center(child: Text("No movies found", style: TextStyle(fontSize: 16)))
                     : GridView.builder(
                         padding: const EdgeInsets.all(10),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -215,16 +215,16 @@ class _AllMoviesScreenState extends State<AllMoviesScreen> {
                   IconButton(
                     onPressed: currentPage > 1 ? _previousPage : null,
                     icon: const Icon(Icons.arrow_back_ios),
-                    color: currentPage > 1 ? const Color(0xFF6200EE) : Colors.grey, 
+                    color: currentPage > 1 ? colorScheme.primary : Colors.grey, 
                   ),
                   Text(
                     "Page $currentPage",
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: colorScheme.onSurface),
                   ),
                   IconButton(
                     onPressed: _nextPage,
                     icon: const Icon(Icons.arrow_forward_ios),
-                    color: const Color(0xFF6200EE), 
+                    color: colorScheme.primary, 
                   ),
                 ],
               ),
