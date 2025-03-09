@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nowplaying/services/shared_prefs_service.dart';
@@ -61,9 +63,29 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        profileImage = pickedFile.path;
-      });
+      if (kIsWeb) {
+        // Pada web, baca gambar sebagai bytes lalu encode ke base64
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          profileImage = base64Encode(bytes);
+        });
+      } else {
+        setState(() {
+          profileImage = pickedFile.path;
+        });
+      }
+    }
+  }
+
+  // Helper untuk mendapatkan ImageProvider sesuai platform
+  ImageProvider _getProfileImage(String imageStr) {
+    if (imageStr.isEmpty) {
+      return const AssetImage("assets/profile.jpg");
+    }
+    if (kIsWeb) {
+      return MemoryImage(base64Decode(imageStr));
+    } else {
+      return FileImage(File(imageStr));
     }
   }
 
@@ -80,8 +102,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
       hobby: _hobbyController.text,
     );
     await _prefsService.saveProfileImage(profileImage);
-    await _prefsService
-        .saveSocialMedia(List<Map<String, String>>.from(socialMedia));
+    await _prefsService.saveSocialMedia(List<Map<String, String>>.from(socialMedia));
     await _prefsService.saveMoviePreferences(selectedGenres);
 
     Navigator.pop(context, true);
@@ -94,8 +115,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text("Edit About Me",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Edit About Me", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: colorScheme.primary,
       ),
       body: SingleChildScrollView(
@@ -106,9 +126,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
             Center(
               child: CircleAvatar(
                 radius: 80,
-                backgroundImage: profileImage.isNotEmpty
-                    ? Image.file(File(profileImage)).image
-                    : const AssetImage("assets/profile.jpg"),
+                backgroundImage: _getProfileImage(profileImage),
               ),
             ),
             const SizedBox(height: 12),
@@ -120,19 +138,12 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
               ),
               child: const Text("Upload Photo"),
             ),
-
             const SizedBox(height: 10),
             _buildTextField("Full Name", _fullNameController),
             _buildTextField("Nickname", _nicknameController),
-            _buildTextField("hobby", _hobbyController),
-
+            _buildTextField("Hobby", _hobbyController),
             const SizedBox(height: 20),
-
-            // Social Media
-            const Text(
-              "Social Media",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const Text("Social Media", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             Column(
               children: socialMedia.asMap().entries.map((entry) {
@@ -144,30 +155,23 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
                       Expanded(
                         child: TextField(
                           style: TextStyle(color: colorScheme.onSurface),
-                          controller: TextEditingController(
-                              text: socialMedia[index]["platform"]),
-                          decoration:
-                              _customInputDecoration("Platform", colorScheme),
-                          onChanged: (value) =>
-                              socialMedia[index]["platform"] = value,
+                          controller: TextEditingController(text: socialMedia[index]["platform"]),
+                          decoration: _customInputDecoration("Platform", colorScheme),
+                          onChanged: (value) => socialMedia[index]["platform"] = value,
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: TextField(
                           style: TextStyle(color: colorScheme.onSurface),
-                          controller: TextEditingController(
-                              text: socialMedia[index]["username"]),
-                          decoration:
-                              _customInputDecoration("Username", colorScheme),
-                          onChanged: (value) =>
-                              socialMedia[index]["username"] = value,
+                          controller: TextEditingController(text: socialMedia[index]["username"]),
+                          decoration: _customInputDecoration("Username", colorScheme),
+                          onChanged: (value) => socialMedia[index]["username"] = value,
                         ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.redAccent),
-                        onPressed: () =>
-                            setState(() => socialMedia.removeAt(index)),
+                        onPressed: () => setState(() => socialMedia.removeAt(index)),
                       ),
                     ],
                   ),
@@ -182,12 +186,8 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
               ),
               child: const Text("Add Social Media"),
             ),
-
             const SizedBox(height: 20),
-
-            // Movie Preferences
-            const Text("Movie Preferences",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("Movie Preferences", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -196,9 +196,8 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
                   label: Text(
                     genre,
                     style: TextStyle(
-                        color: selectedGenres.contains(genre)
-                            ? colorScheme.onSecondary
-                            : colorScheme.onSurface),
+                      color: selectedGenres.contains(genre) ? colorScheme.onSecondary : colorScheme.onSurface,
+                    ),
                   ),
                   selectedColor: colorScheme.secondary,
                   backgroundColor: colorScheme.surface,
@@ -215,10 +214,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
                 );
               }).toList(),
             ),
-
             const SizedBox(height: 20),
-
-            // Save Button
             ElevatedButton(
               onPressed: _saveAboutMe,
               style: ElevatedButton.styleFrom(
@@ -233,9 +229,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     );
   }
 
-  // Custom Input Decoration
-  InputDecoration _customInputDecoration(
-      String label, ColorScheme colorScheme) {
+  InputDecoration _customInputDecoration(String label, ColorScheme colorScheme) {
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
@@ -250,15 +244,13 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     );
   }
 
-  // Custom Text Field
   Widget _buildTextField(String label, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: controller,
         style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        decoration:
-            _customInputDecoration(label, Theme.of(context).colorScheme),
+        decoration: _customInputDecoration(label, Theme.of(context).colorScheme),
       ),
     );
   }

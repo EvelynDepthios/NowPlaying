@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nowplaying/services/shared_prefs_service.dart';
 import 'package:nowplaying/screen/edit_aboutme.dart';
@@ -37,6 +39,18 @@ class _AboutScreenState extends State<AboutScreen> {
       socialMedia = List<Map<String, String>>.from(data['socialMedia']);
       moviePreferences = List<String>.from(data['moviePreferences']);
     });
+  }
+
+  // Helper untuk mendapatkan ImageProvider sesuai platform
+  ImageProvider _getProfileImage(String imageStr) {
+    if (imageStr.isEmpty) {
+      return const AssetImage("assets/profile.jpg");
+    }
+    if (kIsWeb) {
+      return MemoryImage(base64Decode(imageStr));
+    } else {
+      return FileImage(File(imageStr));
+    }
   }
 
   @override
@@ -85,7 +99,9 @@ class _AboutScreenState extends State<AboutScreen> {
                       builder: (context) => Dialog(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: Image.file(File(profileImage), fit: BoxFit.cover),
+                          child: kIsWeb
+                              ? Image.memory(base64Decode(profileImage), fit: BoxFit.cover)
+                              : Image.file(File(profileImage), fit: BoxFit.cover),
                         ),
                       ),
                     );
@@ -93,9 +109,7 @@ class _AboutScreenState extends State<AboutScreen> {
                 },
                 child: CircleAvatar(
                   radius: 70,
-                  backgroundImage: profileImage.isNotEmpty
-                      ? FileImage(File(profileImage))
-                      : const AssetImage("assets/profile.jpg") as ImageProvider,
+                  backgroundImage: _getProfileImage(profileImage),
                 ),
               ),
             ),
@@ -120,7 +134,7 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // Widget for Nama, Nickname, Hobi
+  // Widget untuk menampilkan informasi pribadi
   Widget _buildInfoField(String label, String value) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -147,7 +161,7 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // Card for Social Media
+  // Card untuk Social Media
   Widget _buildSocialMediaCard() {
     return Card(
       color: Colors.grey[900],
@@ -186,7 +200,7 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // Card for Movie Preferences
+  // Card untuk Movie Preferences
   Widget _buildMoviePreferencesCard() {
     return Card(
       color: Colors.grey[900],
