@@ -16,7 +16,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
   String fullName = "Your Name";
   String nickname = "Your Nickname";
-  String hobbies = "Your Hobbies";
+  String hobby = "Your hobby";
   String profileImage = "";
   List<Map<String, String>> socialMedia = [];
   List<String> moviePreferences = [];
@@ -32,7 +32,7 @@ class _AboutScreenState extends State<AboutScreen> {
     setState(() {
       fullName = data['fullName'] ?? "Your Name";
       nickname = data['nickname'] ?? "Your Nickname";
-      hobbies = data['hobbies'] ?? "Your Hobbies";
+      hobby = data['hobby'] ?? "Your hobby";
       profileImage = data['profileImage'] ?? "";
       socialMedia = List<Map<String, String>>.from(data['socialMedia']);
       moviePreferences = List<String>.from(data['moviePreferences']);
@@ -56,7 +56,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   builder: (context) => EditAboutScreen(
                     fullName: fullName,
                     nickname: nickname,
-                    hobbies: hobbies,
+                    hobby: hobby,
                     profileImage: profileImage,
                     socialMedia: List<Map<String, String>>.from(socialMedia),
                     moviePreferences: List<String>.from(moviePreferences),
@@ -75,7 +75,7 @@ class _AboutScreenState extends State<AboutScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // **Foto Profil**
+            // Profile Picture
             Center(
               child: GestureDetector(
                 onTap: () {
@@ -102,14 +102,14 @@ class _AboutScreenState extends State<AboutScreen> {
 
             const SizedBox(height: 20),
 
-            // **Form Data Diri (Nama, Nickname, Hobi)**
+            // Personal Information
             _buildInfoField("Full Name", fullName),
             _buildInfoField("Nickname", nickname),
-            _buildInfoField("Hobbies", hobbies),
+            _buildInfoField("Hobby", hobby),
 
             const SizedBox(height: 20),
 
-            // **Social Media & Movie Preferences dalam Column**
+            // Social Media & Movie Preferences
             _buildSocialMediaCard(),
             const SizedBox(height: 16),
             _buildMoviePreferencesCard(),
@@ -120,7 +120,7 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // **Widget untuk Nama, Nickname, Hobi**
+  // Widget for Nama, Nickname, Hobi
   Widget _buildInfoField(String label, String value) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -147,7 +147,7 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // **Card untuk Social Media**
+  // Card for Social Media
   Widget _buildSocialMediaCard() {
     return Card(
       color: Colors.grey[900],
@@ -186,7 +186,7 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // **Card untuk Movie Preferences**
+  // Card for Movie Preferences
   Widget _buildMoviePreferencesCard() {
     return Card(
       color: Colors.grey[900],
@@ -202,11 +202,11 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
             const SizedBox(height: 8),
             moviePreferences.isNotEmpty
-                ? Center( // Pusatkan elemen ke tengah
+                ? Center( 
                     child: Wrap(
-                      spacing: 8, // Jarak antar elemen horizontal
-                      runSpacing: 8, // Jarak antar elemen vertikal
-                      alignment: WrapAlignment.center, // Pusatkan elemen dalam satu baris
+                      spacing: 8, 
+                      runSpacing: 8, 
+                      alignment: WrapAlignment.center, 
                       children: moviePreferences.map((genre) {
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -236,7 +236,6 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // **Garis Pembatas antar Informasi**
   Widget _buildDivider() {
     return const Divider(
       thickness: 1,
@@ -246,7 +245,6 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  // **Warna untuk Genre (Ditingkatkan)**
   Color _getGenreColor(String genre) {
     Map<String, Color> genreColors = {
       "Action": const Color(0xFFD32F2F), 

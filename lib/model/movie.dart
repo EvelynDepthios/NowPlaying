@@ -1,6 +1,6 @@
 class Movie {
   final String title;
-  final String backDropPath;
+  final String? backDropPath; // Change this to nullable in some case backDropPath can be null
   final String overview;
   final double popularity;
   final double voteAverage;

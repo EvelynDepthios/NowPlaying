@@ -37,14 +37,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
   Future<void> _loadGenres() async {
     if (widget.movie.genreIds.isNotEmpty) {
-      // Jika genre sudah ada, langsung gunakan
+      // If genre sudah ada, langsung gunakan
       setState(() {
         genreNames = widget.movie.genreIds
             .map((id) => APIservices.genreMap[id] ?? "Unknown")
             .toList();
       });
     } else {
-      // Jika genre kosong, fetch dari API
+      // If genre kosong, fetch dari API (from Watchlist)
       await _fetchMovieGenres();
     }
   }
@@ -101,7 +101,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // **Movie Image & Bookmark Button**
+            // Movie Image & Bookmark Button
             Stack(
               children: [
                 Image.network(
@@ -169,7 +169,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // **Genre Chips**
+                  // Genres
                   if (isFetchingGenres)
                     const Center(child: CircularProgressIndicator())
                   else if (genreNames.isNotEmpty)
@@ -199,7 +199,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
                   const SizedBox(height: 16),
 
-                  // **Movie Details**
+                  // Movie Details
                   Row(
                     children: [
                       const Icon(Icons.calendar_today, size: 20),
@@ -230,7 +230,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // **Movie Overview**
+                  // Movie Overview
                   const Text(
                     "Overview",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

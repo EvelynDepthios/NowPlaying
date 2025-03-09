@@ -7,7 +7,7 @@ import 'package:nowplaying/services/services.dart';
 class EditAboutScreen extends StatefulWidget {
   final String fullName;
   final String nickname;
-  final String hobbies;
+  final String hobby;
   final String profileImage;
   final List<Map<String, String>> socialMedia;
   final List<String> moviePreferences;
@@ -16,7 +16,7 @@ class EditAboutScreen extends StatefulWidget {
     super.key,
     required this.fullName,
     required this.nickname,
-    required this.hobbies,
+    required this.hobby,
     required this.profileImage,
     required this.socialMedia,
     required this.moviePreferences,
@@ -33,7 +33,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
 
   late TextEditingController _fullNameController;
   late TextEditingController _nicknameController;
-  late TextEditingController _hobbiesController;
+  late TextEditingController _hobbyController;
   String profileImage = "";
   List<Map<String, String>> socialMedia = [];
   List<String> selectedGenres = [];
@@ -44,7 +44,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     super.initState();
     _fullNameController = TextEditingController(text: widget.fullName);
     _nicknameController = TextEditingController(text: widget.nickname);
-    _hobbiesController = TextEditingController(text: widget.hobbies);
+    _hobbyController = TextEditingController(text: widget.hobby);
     profileImage = widget.profileImage;
     socialMedia = List<Map<String, String>>.from(widget.socialMedia);
     selectedGenres = List<String>.from(widget.moviePreferences);
@@ -77,7 +77,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     await _prefsService.saveAboutMe(
       fullName: _fullNameController.text,
       nickname: _nicknameController.text,
-      hobbies: _hobbiesController.text,
+      hobby: _hobbyController.text,
     );
     await _prefsService.saveProfileImage(profileImage);
     await _prefsService
@@ -102,7 +102,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // **Profile Picture**
+            // Profile Picture
             Center(
               child: CircleAvatar(
                 radius: 80,
@@ -124,11 +124,11 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
             const SizedBox(height: 10),
             _buildTextField("Full Name", _fullNameController),
             _buildTextField("Nickname", _nicknameController),
-            _buildTextField("Hobbies", _hobbiesController),
+            _buildTextField("hobby", _hobbyController),
 
             const SizedBox(height: 20),
 
-            // **Social Media**
+            // Social Media
             const Text(
               "Social Media",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -185,7 +185,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
 
             const SizedBox(height: 20),
 
-            // **Movie Preferences**
+            // Movie Preferences
             const Text("Movie Preferences",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Wrap(
@@ -218,7 +218,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
 
             const SizedBox(height: 20),
 
-            // **Save Button**
+            // Save Button
             ElevatedButton(
               onPressed: _saveAboutMe,
               style: ElevatedButton.styleFrom(
@@ -233,7 +233,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     );
   }
 
-  // **Custom Input Decoration**
+  // Custom Input Decoration
   InputDecoration _customInputDecoration(
       String label, ColorScheme colorScheme) {
     return InputDecoration(
@@ -250,7 +250,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     );
   }
 
-  // **Custom Text Field**
+  // Custom Text Field
   Widget _buildTextField(String label, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

@@ -4,21 +4,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPrefsService {
   static const String keyFullName = 'full_name';
   static const String keyNickname = 'nickname';
-  static const String keyHobbies = 'hobbies';
+  static const String keyHobby = 'hobby';
   static const String keyProfileImage = 'profile_image';
   static const String keySocialMedia = 'social_media'; 
   static const String keyMoviePreferences = 'movie_preferences'; 
-  static const String keyGenres = 'genres'; // Tambahkan key untuk genre
+  static const String keyGenres = 'genres';
 
   Future<void> saveAboutMe({
     required String fullName,
     required String nickname,
-    required String hobbies,
+    required String hobby,
   }) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(keyFullName, fullName);
     await prefs.setString(keyNickname, nickname);
-    await prefs.setString(keyHobbies, hobbies);
+    await prefs.setString(keyHobby, hobby);
   }
 
   Future<void> saveProfileImage(String imagePath) async {
@@ -48,7 +48,7 @@ class SharedPrefsService {
     return {
       'fullName': prefs.getString(keyFullName) ?? "",
       'nickname': prefs.getString(keyNickname) ?? "",
-      'hobbies': prefs.getString(keyHobbies) ?? "",
+      'hobby': prefs.getString(keyHobby) ?? "",
       'profileImage': prefs.getString(keyProfileImage) ?? "",
       'socialMedia': jsonDecode(prefs.getString(keySocialMedia) ?? '[]')
         .map<Map<String, String>>((item) => Map<String, String>.from(item))
