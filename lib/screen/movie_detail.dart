@@ -37,34 +37,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
   Future<void> _loadGenres() async {
     if (widget.movie.genreIds.isNotEmpty) {
-      // If genre sudah ada, langsung gunakan
+      if (APIservices.genreMap.isEmpty) {
+        await APIservices().fetchGenres();
+      }
       setState(() {
-        genreNames = widget.movie.genreIds
-            .map((id) => APIservices.genreMap[id] ?? "Unknown")
-            .toList();
+        genreNames = APIservices()
+            .getGenreNames(widget.movie.genreIds)
+            .split(", ");
       });
-    } else {
-      // If genre kosong, fetch dari API (from Watchlist)
-      await _fetchMovieGenres();
-    }
-  }
-
-  Future<void> _fetchMovieGenres() async {
-    setState(() => isFetchingGenres = true);
-
-    final response = await http.get(Uri.parse(
-        "https://api.themoviedb.org/3/movie/${widget.movie.id}?api_key=4de293b17f3059110541d94584b1727e"));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      List<dynamic> genres = data['genres'];
-
-      setState(() {
-        genreNames = genres.map((g) => g['name'] as String).toList();
-        isFetchingGenres = false;
-      });
-    } else {
-      setState(() => isFetchingGenres = false);
     }
   }
 
